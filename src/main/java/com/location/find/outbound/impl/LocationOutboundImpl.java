@@ -1,14 +1,15 @@
 package com.location.find.outbound.impl;
 
 import com.location.find.configuration.WebClientUtils;
+import com.location.find.library.CustomException;
 import com.location.find.model.LocationRequest;
 import com.location.find.model.OutboundPath;
+import com.location.find.model.ResponseCode;
 import com.location.find.model.outbound.LocationOutboundResponse;
 import com.location.find.outbound.LocationOutbound;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -42,10 +43,17 @@ public class LocationOutboundImpl implements LocationOutbound {
         queryParam.add("apiKey", apiKey);
         queryParam.add("q", location);
         return webClientUtils.get(webClientGeoLocation, OutboundPath.BASE_PATH_GEOCODE, queryParam, LocationOutboundResponse.class)
-                .map(ResponseEntity::getBody)
-                .doOnError(e -> {
-                    log.error("Error getGeocode {} :  ", location, e);
+                .doOnError(e -> log.error("Error getGeocode {} :  ", location, e))
+                .<LocationOutboundResponse>handle((response, sink) -> {
+                    if (response.getBody() == null) {
+                        log.error("getGeocode response null");
+                        sink.error(new CustomException(
+                                ResponseCode.THIRD_PARTY_ERROR.getCode(), ResponseCode.THIRD_PARTY_ERROR.getMessage()));
+                        return;
+                    }
+                    sink.next(response.getBody());
                 });
+
     }
 
     @Override
@@ -55,9 +63,15 @@ public class LocationOutboundImpl implements LocationOutbound {
         queryParam.add("apiKey", apiKey);
         queryParam.add("q", locationRequest.getType().name());
         return webClientUtils.get(webClientDiscover, OutboundPath.BASE_PATH_DISCOVER, queryParam, LocationOutboundResponse.class)
-                .map(ResponseEntity::getBody)
-                .doOnError(e -> {
-                    log.error("Error getDiscover {} :  ", locationRequest, e);
+                .doOnError(e -> log.error("Error getDiscover {} :  ", locationRequest, e))
+                .<LocationOutboundResponse>handle((response, sink) -> {
+                    if (response.getBody() == null) {
+                        log.error("getDiscover response null");
+                        sink.error(new CustomException(
+                                ResponseCode.THIRD_PARTY_ERROR.getCode(), ResponseCode.THIRD_PARTY_ERROR.getMessage()));
+                        return;
+                    }
+                    sink.next(response.getBody());
                 });
     }
 

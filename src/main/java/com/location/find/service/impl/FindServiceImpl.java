@@ -10,6 +10,7 @@ import com.location.find.model.outbound.OpeningHour;
 import com.location.find.outbound.LocationOutbound;
 import com.location.find.service.FindService;
 import io.micrometer.common.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -21,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class FindServiceImpl implements FindService {
 
@@ -48,7 +50,7 @@ public class FindServiceImpl implements FindService {
                         });
             }
             return getDiscover(locationRequest);
-        });
+        }).doOnError(e-> log.error("Error findLocation with request {}, e:", locationRequest, e));
     }
 
     private Mono<List<FindResponse>> getDiscover(LocationRequest locationRequest) {
