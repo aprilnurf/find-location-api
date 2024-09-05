@@ -12,7 +12,8 @@ public enum ResponseCode {
     SYSTEM_ERROR("SYSTEM_ERROR", "System error"),
     FAILED("FAILED", "Failed error"),
     DATA_NOT_EXIST("DATA_NOT_EXIST", "Data Not Exist"),
-    THIRD_PARTY_ERROR("THIRD_PARTY_ERROR", "Third party error");
+    THIRD_PARTY_ERROR("THIRD_PARTY_ERROR", "Third party error"),
+    TYPE_DATA_NOT_MATCH("TYPE_DATA_NOT_MATCH", "Type data not match");
 
     private String code;
     private String message;
