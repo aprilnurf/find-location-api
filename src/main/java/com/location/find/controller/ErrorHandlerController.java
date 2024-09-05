@@ -26,7 +26,18 @@ public class ErrorHandlerController {
     public BaseResponse handleError(BindException ex) {
         log.error("Error during validation", ex);
         List<FieldError> fieldErrors = ex.getFieldErrors();
-        List<String> errors = fieldErrors.stream().map(e-> e.getField() + " " +e.getDefaultMessage()).toList();
+        List<String> errors = fieldErrors.stream().map(e -> e.getField() + " " + e.getDefaultMessage()).toList();
+        return ResponseHelper.constructResponse(
+                ResponseCode.BIND_ERROR.getCode(),
+                ResponseCode.BIND_ERROR.getMessage(),
+                errors, null);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public BaseResponse handleError(ValidationException ex) {
+        log.error("Error during validation", ex);
+        List<String> errors = Collections.singletonList(ex.getCause().getLocalizedMessage());
         return ResponseHelper.constructResponse(
                 ResponseCode.BIND_ERROR.getCode(),
                 ResponseCode.BIND_ERROR.getMessage(),
